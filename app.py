@@ -8,6 +8,7 @@ import random
 from tensorflow.lite.python.interpreter import Interpreter
 import matplotlib.pyplot as plt
 from PIL import Image
+from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
 
 # Define paths
 PATH_TO_MODEL = './detect.tflite'
@@ -30,16 +31,11 @@ def tflite_detect_images(image, modelpath, lblpath, min_conf=0.5, txt_only=False
     width = input_details[0]['shape'][2]
 
     # Convert the uploaded image to numpy array
-    
-
     # Convert the uploaded image to a PIL Image
     uploaded_image = Image.open(image)
 
     # Convert the PIL Image to a NumPy array
     image = np.array(uploaded_image)
-
-    # Check the data type of the image
-    #st.write(image.dtype)
 
     # Preprocess the image
     image_rgb = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
@@ -89,26 +85,76 @@ def tflite_detect_images(image, modelpath, lblpath, min_conf=0.5, txt_only=False
     if txt_only == False:
         image = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
         st.image(image, caption="Object Detection Result", use_column_width=True)
-        #plt.figure(figsize=(12, 16))
-        #plt.imshow(image)
-        #plt.axis('off')
-        #st.pyplot()
-        
-    
-    return 
+
+# Custom VideoTransformer to perform object detection on webcam feed
+class ObjectDetectionTransformer(VideoTransformerBase):
+    def __init__(self, modelpath, lblpath, min_conf=0.5):
+        self.modelpath = modelpath
+        self.lblpath = lblpath
+        self.min_conf = min_conf
+        self.interpreter = Interpreter(model_path=self.modelpath)
+        self.interpreter.allocate_tensors()
+        self.input_details = self.interpreter.get_input_details()
+        self.output_details = self.interpreter.get_output_details()
+        self.height = self.input_details[0]['shape'][1]
+        self.width = self.input_details[0]['shape'][2]
+
+        # Load label map
+        with open(self.lblpath, 'r') as f:
+            self.labels = [line.strip() for line in f.readlines()]
+
+    def transform(self, frame):
+        # Convert the frame to numpy array
+        image = frame.to_ndarray(format="bgr24")
+
+        # Preprocess the image
+        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        imH, imW, _ = image.shape
+        image_resized = cv2.resize(image_rgb, (self.width, self.height))
+        input_data = np.expand_dims(image_resized, axis=0)
+
+        # Perform object detection by running the model with the image as input
+        self.interpreter.set_tensor(self.input_details[0]['index'], input_data)
+        self.interpreter.invoke()
+
+        # Retrieve detection results
+        boxes = self.interpreter.get_tensor(self.output_details[1]['index'])[0] # Bounding box coordinates of detected objects
+        classes = self.interpreter.get_tensor(self.output_details[3]['index'])[0] # Class index of detected objects
+        scores = self.interpreter.get_tensor(self.output_details[0]['index'])[0] # Confidence of detected objects
+
+        # Loop over all detections and draw detection box if confidence is above minimum threshold
+        for i in range(len(scores)):
+            if ((scores[i] > self.min_conf) and (scores[i] <= 1.0)):
+                # Get bounding box coordinates and draw box
+                ymin = int(max(1,(boxes[i][0] * imH)))
+                xmin = int(max(1,(boxes[i][1] * imW)))
+                ymax = int(min(imH,(boxes[i][2] * imH)))
+                xmax = int(min(imW,(boxes[i][3] * imW)))
+                cv2.rectangle(image, (xmin,ymin), (xmax,ymax), (10, 255, 0), 2)
+
+                # Draw label
+                object_name = self.labels[int(classes[i])] # Look up object name from "labels" array using class index
+                label = '%s: %d%%' % (object_name, int(scores[i]*100)) # Example: 'person: 72%'
+                labelSize, baseLine = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2) # Get font size
+                label_ymin = max(ymin, labelSize[1] + 10) # Make sure not to draw label too close to top of window
+                cv2.rectangle(image, (xmin, label_ymin-labelSize[1]-10), (xmin+labelSize[0], label_ymin+baseLine-10), (255, 255, 255), cv2.FILLED) # Draw white box to put label text in
+                cv2.putText(image, label, (xmin, label_ymin-7), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2) # Draw label text
+
+        return image
 
 # Main Streamlit app
 def main():
-    st.title('Object Detection using Image Upload')
+    st.title('Object Detection using Webcam')
 
-    uploaded_image = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+    min_conf_threshold = st.slider('Confidence Threshold', 0.0, 1.0, 0.5, 0.01)
 
-    if uploaded_image is not None:
-        min_conf_threshold = st.slider('Confidence Threshold', 0.0, 1.0, 0.5, 0.01)
-
-        #if st.button('Start Detection'):
-        tflite_detect_images(uploaded_image, PATH_TO_MODEL, PATH_TO_LABELS, min_conf_threshold)
-            # Do further processing with detections if needed
+    webrtc_streamer(
+        key="object-detection",
+        video_transformer_factory=ObjectDetectionTransformer,
+        modelpath=PATH_TO_MODEL,
+        lblpath=PATH_TO_LABELS,
+        min_conf=min_conf_threshold
+    )
 
 if __name__ == '__main__':
     main()
