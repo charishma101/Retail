@@ -104,7 +104,7 @@ def main():
     st.title('Object Detection using Webcam')
 
     # Configure video capture using streamlit-webrtc
-    webrtc_ctx = webrtc.WebRTC(key="object_detection", video_transform=scale_resolution)
+    webrtc_ctx = webrtc.webrtc_streamer(key="object_detection", video_transform=scale_resolution)
 
     # Function to transform the video frame for processing
     def scale_resolution(frame):
