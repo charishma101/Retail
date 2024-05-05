@@ -111,7 +111,7 @@ def main():
     
 
     # Configure video capture using streamlit-webrtc
-    webrtc_ctx = webrtc.WebRTC(key="object_detection", video_transform=scale_resolution)
+    webrtc_ctx = webrtc_streamer(key="object_detection")
 
     # Function to transform the video frame for processing
     
