@@ -103,14 +103,16 @@ def tflite_detect_images(image, modelpath, lblpath, min_conf=0.5, txt_only=False
 def main():
     st.title('Object Detection using Webcam')
 
-    # Configure video capture using streamlit-webrtc
-    webrtc_ctx = webrtc.webrtc_streamer(key="object_detection", video_transform=scale_resolution)
-
-    # Function to transform the video frame for processing
     def scale_resolution(frame):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.resize(frame, (width, height))
         return frame
+
+    # Configure video capture using streamlit-webrtc
+    webrtc_ctx = webrtc.webrtc_streamer(key="object_detection", video_transform=scale_resolution)
+
+    # Function to transform the video frame for processing
+    
 
     # Set frame width and height (adjust as needed)
     width = 640
