@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import streamlit as st
 import os
+import io
 import glob
 import random
 from tensorflow.lite.python.interpreter import Interpreter
@@ -28,8 +29,15 @@ def tflite_detect_images(image, modelpath, lblpath, min_conf=0.5, txt_only=False
     width = input_details[0]['shape'][2]
 
     # Convert the uploaded image to numpy array
-    st.write(image.dtype)
-    image = np.array(image)
+    
+
+    # Convert the uploaded image to a PIL Image
+    uploaded_image = Image.open(uploaded_image)
+
+    # Convert the PIL Image to a NumPy array
+    image = np.array(uploaded_image)
+
+    # Check the data type of the image
     st.write(image.dtype)
 
     # Preprocess the image
