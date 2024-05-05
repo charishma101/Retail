@@ -146,7 +146,7 @@ def main():
         transformer = VideoTransformer(PATH_TO_MODEL, PATH_TO_LABELS, min_conf_threshold)
 
         # Display the webcam input and process frames using the transformer
-        webrtc_streamer(key="example", video_transformer_factory=lambda: transformer)
+        webrtc_streamer(key="example", mode=WebRtcMode.SENDRECV, video_frame_callback=video_frame_callback, media_stream_constraints={"video": True, "audio": False}, async_processing=True, video_transformer_factory=lambda: transformer)
         
            
     else:
