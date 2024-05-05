@@ -99,15 +99,49 @@ def tflite_detect_images(image, modelpath, lblpath, min_conf=0.5, txt_only=False
 
 # Main Streamlit app
 def main():
-    st.title('Object Detection using Image Upload')
+    st.title('Object Detection using Webcam')
 
-    uploaded_image = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+    use_webcam = st.checkbox("Use Webcam")
+    if use_webcam:
+        cap = cv2.VideoCapture(0)  # Open the default camera (0)
+        
+        # Set the width and height according to your preference
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
-    if uploaded_image is not None:
         min_conf_threshold = st.slider('Confidence Threshold', 0.0, 1.0, 0.5, 0.01)
 
+        while True:
+            ret, frame = cap.read()  # Read a frame from the camera
+
+            # Convert the frame to RGB (OpenCV uses BGR by default)
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            # Display the frame in Streamlit
+            st.image(frame_rgb, channels="RGB")
+
+            # Perform object detection when a button is pressed
+            if st.button('Start Detection'):
+                tflite_detect_images(frame_rgb, PATH_TO_MODEL, PATH_TO_LABELS, min_conf_threshold)
+                # Do further processing with detections if needed
+
+            # Check if the user wants to exit
+            if st.button('Stop Webcam'):
+                break
+
+        cap.release()  # Release the camera
+        cv2.destroyAllWindows()  # Close all OpenCV windows
+
+    else:
+        st.title('Object Detection using Image Upload')
+
+        uploaded_image = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+
+        if uploaded_image is not None:
+            min_conf_threshold = st.slider('Confidence Threshold', 0.0, 1.0, 0.5, 0.01)
+
         #if st.button('Start Detection'):
-        tflite_detect_images(uploaded_image, PATH_TO_MODEL, PATH_TO_LABELS, min_conf_threshold)
+            tflite_detect_images(uploaded_image, PATH_TO_MODEL, PATH_TO_LABELS, min_conf_threshold)
             # Do further processing with detections if needed
 
 if __name__ == '__main__':
