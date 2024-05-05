@@ -95,20 +95,7 @@ def tflite_detect_images(image, modelpath, lblpath, min_conf=0.5, txt_only=False
         #st.pyplot()
         
     
-    elif txt_only == True:
-
-        # Get filenames and paths
-        image_fn = os.path.basename(image_path)
-        base_fn, ext = os.path.splitext(image_fn)
-        txt_result_fn = base_fn +'.txt'
-        txt_savepath = os.path.join(savepath, txt_result_fn)
-
-        # Write results to text file
-        # (Using format defined by https://github.com/Cartucho/mAP, which will make it easy to calculate mAP)
-        with open(txt_savepath,'w') as f:
-            for detection in detections:
-                f.write('%s %.4f %d %d %d %d\n' % (detection[0], detection[1], detection[2], detection[3], detection[4], detection[5]))
-        return detection
+    return 
 
 # Main Streamlit app
 def main():
@@ -119,8 +106,8 @@ def main():
     if uploaded_image is not None:
         min_conf_threshold = st.slider('Confidence Threshold', 0.0, 1.0, 0.5, 0.01)
 
-        if st.button('Start Detection'):
-            detections = tflite_detect_images(uploaded_image, PATH_TO_MODEL, PATH_TO_LABELS, min_conf_threshold)
+        #if st.button('Start Detection'):
+        tflite_detect_images(uploaded_image, PATH_TO_MODEL, PATH_TO_LABELS, min_conf_threshold)
             # Do further processing with detections if needed
 
 if __name__ == '__main__':
