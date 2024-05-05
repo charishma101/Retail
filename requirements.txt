@@ -10,3 +10,4 @@ imageio[ffmpeg]
 tensorflow
 matplotlib
 pillow
+streamlit-webrtc
