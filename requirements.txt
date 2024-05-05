@@ -1,0 +1,12 @@
+ipython  # interactive notebook
+psutil  # system utilization
+thop>=0.1.1  # FLOPs computation
+streamlit
+opencv-python
+torch
+ultralytics
+numpy
+imageio[ffmpeg]
+tensorflow
+matplotlib
+pillow
