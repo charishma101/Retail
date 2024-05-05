@@ -120,8 +120,9 @@ def main():
     width = 640
     height = 480
 
-    if webrtc_ctx.video:
-        frame = webrtc_ctx.video.frame.to_ndarray(format="bgr24")
+    if webrtc_ctx.state.playing:
+        frame = webrtc_ctx.frame.to_ndarray(format="bgr24")
+        frame = scale_resolution(frame)
 
         # Perform object detection on the webcam frame
         tflite_detect_images(frame, PATH_TO_MODEL, PATH_TO_LABELS)
