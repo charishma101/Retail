@@ -39,7 +39,7 @@ def tflite_detect_images(image, modelpath, lblpath, min_conf=0.5, txt_only=False
     image = np.array(uploaded_image)
 
     # Check the data type of the image
-    st.write(image.dtype)
+    #st.write(image.dtype)
 
     # Preprocess the image
     image_rgb = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
@@ -88,7 +88,7 @@ def tflite_detect_images(image, modelpath, lblpath, min_conf=0.5, txt_only=False
     # Display or save the image with detections
     if txt_only == False:
         image = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
-        st.image(image, caption="Object Detection Result", use_column_width=True)
+        st.image(image, caption="Object Detection Result", use_column_width=False)
         #plt.figure(figsize=(12, 16))
         #plt.imshow(image)
         #plt.axis('off')
