@@ -9,7 +9,7 @@ from tensorflow.lite.python.interpreter import Interpreter
 import streamlit_webrtc as webrtc
 import matplotlib.pyplot as plt
 from PIL import Image
-from streamlit_webrtc import webrtc_streamer
+from streamlit_webrtc import webrtc_streamer, RTCConfiguration
 
 # Define paths
 PATH_TO_MODEL = './detect.tflite'
@@ -110,22 +110,20 @@ def main():
 
     
 
-    # Configure video capture using streamlit-webrtc
-    webrtc_ctx = webrtc_streamer(key="object_detection")
-
-    # Function to transform the video frame for processing
-    
-
-    # Set frame width and height (adjust as needed)
-    width = 640
-    height = 480
-
-    if webrtc_ctx.state.playing:
-        frame = webrtc_ctx.frame.to_ndarray(format="bgr24")
-        frame = scale_resolution(frame)
-
-        # Perform object detection on the webcam frame
+    class VideoProcessor:
+	def recv(self, frame):
+		#frm = frame.to_ndarray(format="bgr24")
         tflite_detect_images(frame, PATH_TO_MODEL, PATH_TO_LABELS)
+
+		#faces = cascade.detectMultiScale(cv2.cvtColor(frm, cv2.COLOR_BGR2GRAY), 1.1, 3)
+
+		#for x,y,w,h in faces:
+			#cv2.rectangle(frm, (x,y), (x+w, y+h), (0,255,0), 3)
+
+		#return av.VideoFrame.from_ndarray(frm, format='bgr24')
+
+    webrtc_streamer(key="key", video_processor_factory=VideoProcessor,rtc_configuration=RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}))
+    
 
         
 if __name__ == '__main__':
