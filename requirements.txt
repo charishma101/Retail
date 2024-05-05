@@ -2,7 +2,6 @@ ipython  # interactive notebook
 psutil  # system utilization
 thop>=0.1.1  # FLOPs computation
 streamlit
-opencv-python
 torch
 ultralytics
 numpy
@@ -10,4 +9,7 @@ imageio[ffmpeg]
 tensorflow
 matplotlib
 pillow
-streamlit-webrtc
+opencv-python-headless==4.8.1.78
+pydub==0.25.1
+streamlit_webrtc==0.47.1
+twilio~=8.10.1
