@@ -139,7 +139,7 @@ def main():
 
     use_webcam = st.checkbox("Use Webcam")
     if use_webcam:
-         st.title('Object Detection using Webcam')
+        st.title('Object Detection using Webcam')
 
     
         min_conf_threshold = st.slider('Confidence Threshold', 0.0, 1.0, 0.5, 0.01)
