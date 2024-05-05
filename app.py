@@ -115,14 +115,14 @@ def main():
             ret, frame = cap.read()  # Read a frame from the camera
 
             # Convert the frame to RGB (OpenCV uses BGR by default)
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            #frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             # Display the frame in Streamlit
-            st.image(frame_rgb, channels="RGB")
+            #st.image(frame_rgb, channels="RGB")
 
             # Perform object detection when a button is pressed
-            if st.button('Start Detection'):
-                tflite_detect_images(frame_rgb, PATH_TO_MODEL, PATH_TO_LABELS, min_conf_threshold)
+            #if st.button('Start Detection'):
+            tflite_detect_images(frame, PATH_TO_MODEL, PATH_TO_LABELS, min_conf_threshold)
                 # Do further processing with detections if needed
 
             # Check if the user wants to exit
