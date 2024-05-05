@@ -6,7 +6,7 @@ import io
 import glob
 import random
 from tensorflow.lite.python.interpreter import Interpreter
-from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
+from streamlit_webrtc import VideoTransformerBase, WebRtcMode, webrtc_streamer
 import matplotlib.pyplot as plt
 from PIL import Image
 
