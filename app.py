@@ -7,6 +7,10 @@ import random
 from tensorflow.lite.python.interpreter import Interpreter
 import matplotlib.pyplot as plt
 
+# Define paths
+PATH_TO_MODEL = './detect.tflite'
+PATH_TO_LABELS = './labelmap.txt'
+
 # Define the tflite_detect_images function
 def tflite_detect_images(image, modelpath, lblpath, min_conf=0.5, txt_only=False):
     # Load the label map into memory
