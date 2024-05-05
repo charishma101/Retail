@@ -28,7 +28,9 @@ def tflite_detect_images(image, modelpath, lblpath, min_conf=0.5, txt_only=False
     width = input_details[0]['shape'][2]
 
     # Convert the uploaded image to numpy array
-    # image = np.array(image)
+    st.write(image.shape)
+    image = np.array(image)
+    print(image.dtype)
 
     # Preprocess the image
     image_rgb = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
