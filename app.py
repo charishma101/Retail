@@ -7,6 +7,7 @@ import glob
 import random
 from tensorflow.lite.python.interpreter import Interpreter
 import matplotlib.pyplot as plt
+from PIL import Image
 
 # Define paths
 PATH_TO_MODEL = './detect.tflite'
