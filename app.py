@@ -6,7 +6,7 @@ import io
 import glob
 import random
 from tensorflow.lite.python.interpreter import Interpreter
-from streamlit_webrtc import VideoTransformerBase, WebRtcMode, webrtc_streamer
+from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
 import matplotlib.pyplot as plt
 from PIL import Image
 
@@ -146,7 +146,7 @@ def main():
         transformer = VideoTransformer(PATH_TO_MODEL, PATH_TO_LABELS, min_conf_threshold)
 
         # Display the webcam input and process frames using the transformer
-        webrtc_streamer(key="example", video_frame_callback=video_frame_callback, media_stream_constraints={"video": True, "audio": False}, async_processing=True, video_transformer_factory=lambda: transformer)
+        webrtc_streamer(key="example", video_transformer_factory=lambda: transformer)
         
            
     else:
