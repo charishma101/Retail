@@ -77,13 +77,27 @@ def tflite_detect_images(image, modelpath, lblpath, min_conf=0.5, txt_only=False
     # Display or save the image with detections
     if txt_only == False:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        st.image(image, caption="Object Detection Result", use_column_width=True)
         plt.figure(figsize=(12, 16))
         plt.imshow(image)
         plt.axis('off')
         st.pyplot()
-    else:
-        # Return the detections for further processing if required
-        return detections
+        
+    
+    elif txt_only == True:
+
+        # Get filenames and paths
+        image_fn = os.path.basename(image_path)
+        base_fn, ext = os.path.splitext(image_fn)
+        txt_result_fn = base_fn +'.txt'
+        txt_savepath = os.path.join(savepath, txt_result_fn)
+
+        # Write results to text file
+        # (Using format defined by https://github.com/Cartucho/mAP, which will make it easy to calculate mAP)
+        with open(txt_savepath,'w') as f:
+            for detection in detections:
+                f.write('%s %.4f %d %d %d %d\n' % (detection[0], detection[1], detection[2], detection[3], detection[4], detection[5]))
+        return detection
 
 # Main Streamlit app
 def main():
