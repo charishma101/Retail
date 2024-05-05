@@ -6,7 +6,7 @@ import io
 import glob
 import random
 from tensorflow.lite.python.interpreter import Interpreter
-from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
+import streamlit_webrtc as webrtc
 import matplotlib.pyplot as plt
 from PIL import Image
 
@@ -98,68 +98,30 @@ def tflite_detect_images(image, modelpath, lblpath, min_conf=0.5, txt_only=False
     
     return 
     
-class VideoTransformer(VideoTransformerBase):
-    def __init__(self, model_path, lbl_path, min_conf=0.5):
-        self.model_path = model_path
-        self.lbl_path = lbl_path
-        self.min_conf = min_conf
-        self.initialize_model()
-
-    def initialize_model(self):
-        # Load the label map into memory
-        with open(self.lbl_path, 'r') as f:
-            self.labels = [line.strip() for line in f.readlines()]
-
-        # Load the TensorFlow Lite model into memory
-        self.interpreter = Interpreter(model_path=self.model_path)
-        self.interpreter.allocate_tensors()
-
-        # Get model details
-        self.input_details = self.interpreter.get_input_details()
-        self.output_details = self.interpreter.get_output_details()
-        self.height = self.input_details[0]['shape'][1]
-        self.width = self.input_details[0]['shape'][2]
-
-    def transform(self, frame):
-        # Convert the frame to a PIL Image
-        pil_image = Image.fromarray(frame)
-
-        # Perform object detection
-        tflite_detect_images(pil_image, self.interpreter, self.labels, self.input_details, self.output_details,
-                            self.height, self.width, self.min_conf)
-
-        # Convert the processed frame back to a NumPy array
-        frame = np.array(pil_image)
-
-        return frame
 
 # Main Streamlit app
 def main():
     st.title('Object Detection using Webcam')
 
-    use_webcam = st.checkbox("Use Webcam")
-    if use_webcam:
-        st.title('Object Detection using Webcam')
+    # Configure video capture using streamlit-webrtc
+    webrtc_ctx = webrtc.WebRTC(key="object_detection", video_transform=scale_resolution)
 
-    
-        min_conf_threshold = st.slider('Confidence Threshold', 0.0, 1.0, 0.5, 0.01)
-        transformer = VideoTransformer(PATH_TO_MODEL, PATH_TO_LABELS, min_conf_threshold)
+    # Function to transform the video frame for processing
+    def scale_resolution(frame):
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame = cv2.resize(frame, (width, height))
+        return frame
 
-        # Display the webcam input and process frames using the transformer
-        webrtc_streamer(key="example", video_transformer_factory=lambda: transformer)
+    # Set frame width and height (adjust as needed)
+    width = 640
+    height = 480
+
+    if webrtc_ctx.video:
+        frame = webrtc_ctx.video.frame.to_ndarray(format="bgr24")
+
+        # Perform object detection on the webcam frame
+        tflite_detect_images(frame, PATH_TO_MODEL, PATH_TO_LABELS)
+
         
-           
-    else:
-        st.title('Object Detection using Image Upload')
-
-        uploaded_image = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
-
-        if uploaded_image is not None:
-            min_conf_threshold = st.slider('Confidence Threshold', 0.0, 1.0, 0.5, 0.01)
-
-        #if st.button('Start Detection'):
-            tflite_detect_images(uploaded_image, PATH_TO_MODEL, PATH_TO_LABELS, min_conf_threshold)
-            # Do further processing with detections if needed
-
 if __name__ == '__main__':
     main()
