@@ -111,9 +111,8 @@ def main():
     
 
     class VideoProcessor:
-	def recv(self, frame):
-		
-        tflite_detect_images(frame, PATH_TO_MODEL, PATH_TO_LABELS)
+	    def recv(self, frame):
+		    tflite_detect_images(frame, PATH_TO_MODEL, PATH_TO_LABELS)
 
     webrtc_streamer(key="key", video_processor_factory=VideoProcessor,rtc_configuration=RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}))
     
