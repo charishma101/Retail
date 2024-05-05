@@ -112,9 +112,13 @@ def main():
         min_conf_threshold = st.slider('Confidence Threshold', 0.0, 1.0, 0.5, 0.01)
 
         while True:
-            ret, image = cap.read()  # Read a frame from the camera
+            ret, image = cap.read()
+            # Read a frame from the camera
+            if not ret:
+                 print("Can't receive frame (stream end?). Exiting ...")
+            break
 
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            frame_rgb = cv2.imread(frame, cv2.COLOR_BGR2RGB)
 
             # Convert the frame to PIL Image
             pil_image = Image.fromarray(frame_rgb)
