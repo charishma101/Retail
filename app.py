@@ -121,8 +121,11 @@ def tflite_detect_images(modelpath, imgpath, lblpath, min_conf=0.5, num_test_ima
 PATH_TO_MODEL = './detect.tflite'
 PATH_TO_LABELS = './labelmap.txt'
 
-# Function to perform object detection on webcam feed
-def detect_objects_on_webcam(model_path, label_path, min_conf):
+
+
+
+# Function to perform object detection on uploaded image
+def detect_objects_on_image(uploaded_image, model_path, label_path, min_conf):
     # Load the label map into memory
     with open(label_path, 'r') as f:
         labels = [line.strip() for line in f.readlines()]
@@ -137,36 +140,27 @@ def detect_objects_on_webcam(model_path, label_path, min_conf):
     height = input_details[0]['shape'][1]
     width = input_details[0]['shape'][2]
 
-    # Open webcam
-    cap = cv2.VideoCapture(0)
+    # Convert uploaded image to OpenCV format
+    image = np.array(uploaded_image)
+    frame = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-    while cap.isOpened():
-        ret, frame = cap.read()
+    # Perform object detection on the frame
+    tflite_detect_images(frame, interpreter, input_details, output_details, labels, min_conf)
 
-        if not ret:
-            break
-
-        # Perform object detection on the frame
-        tflite_detect_images(frame, interpreter, input_details, output_details, labels, min_conf)
-
-        # Display the frame with detections
-        cv2.imshow('Object Detection', frame)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    # Release the capture
-    cap.release()
-    cv2.destroyAllWindows()
+    # Display the frame with detections
+    st.image(frame, channels="BGR", use_column_width=True)
 
 # Main Streamlit app
 def main():
-    st.title('Object Detection using Webcam')
+    st.title('Object Detection using Image Upload')
 
-    min_conf_threshold = st.slider('Confidence Threshold', 0.0, 1.0, 0.5, 0.01)
+    uploaded_image = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
-    if st.button('Start Detection'):
-        detect_objects_on_webcam(PATH_TO_MODEL, PATH_TO_LABELS, min_conf_threshold)
+    if uploaded_image is not None:
+        min_conf_threshold = st.slider('Confidence Threshold', 0.0, 1.0, 0.5, 0.01)
+
+        if st.button('Start Detection'):
+            detect_objects_on_image(uploaded_image, PATH_TO_MODEL, PATH_TO_LABELS, min_conf_threshold)
 
 if __name__ == '__main__':
     main()
