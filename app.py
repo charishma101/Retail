@@ -89,10 +89,10 @@ def tflite_detect_images(image, modelpath, lblpath, min_conf=0.5, txt_only=False
     if txt_only == False:
         image = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
         st.image(image, caption="Object Detection Result", use_column_width=True)
-        plt.figure(figsize=(12, 16))
-        plt.imshow(image)
-        plt.axis('off')
-        st.pyplot()
+        #plt.figure(figsize=(12, 16))
+        #plt.imshow(image)
+        #plt.axis('off')
+        #st.pyplot()
         
     
     elif txt_only == True:
