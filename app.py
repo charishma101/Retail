@@ -33,7 +33,7 @@ def tflite_detect_images(image, modelpath, lblpath, min_conf=0.5, txt_only=False
     
 
     # Convert the uploaded image to a PIL Image
-    uploaded_image = Image.open(uploaded_image)
+    uploaded_image = Image.open(image)
 
     # Convert the PIL Image to a NumPy array
     image = np.array(uploaded_image)
