@@ -9,6 +9,7 @@ from tensorflow.lite.python.interpreter import Interpreter
 import streamlit_webrtc as webrtc
 import matplotlib.pyplot as plt
 from PIL import Image
+from streamlit_webrtc import webrtc_streamer
 
 # Define paths
 PATH_TO_MODEL = './detect.tflite'
@@ -98,18 +99,19 @@ def tflite_detect_images(image, modelpath, lblpath, min_conf=0.5, txt_only=False
     
     return 
     
-
+def scale_resolution(frame):
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame = cv2.resize(frame, (width, height))
+        return frame
+    
 # Main Streamlit app
 def main():
     st.title('Object Detection using Webcam')
 
-    def scale_resolution(frame):
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame = cv2.resize(frame, (width, height))
-        return frame
+    
 
     # Configure video capture using streamlit-webrtc
-    webrtc_ctx = webrtc.webrtc_streamer(key="object_detection", video_transform=scale_resolution)
+    webrtc_ctx = webrtc_streamer(key="object_detection", video_transform=scale_resolution)
 
     # Function to transform the video frame for processing
     
