@@ -116,7 +116,7 @@ def main():
             # Read a frame from the camera
             if not ret:
                  st.write("Can't receive frame (stream end?). Exiting ...")
-            break
+                 break
 
             frame_rgb = cv2.imread(frame, cv2.COLOR_BGR2RGB)
 
