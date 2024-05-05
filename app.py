@@ -6,6 +6,7 @@ import io
 import glob
 import random
 from tensorflow.lite.python.interpreter import Interpreter
+from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
 import matplotlib.pyplot as plt
 from PIL import Image
 
@@ -96,6 +97,41 @@ def tflite_detect_images(image, modelpath, lblpath, min_conf=0.5, txt_only=False
         
     
     return 
+    
+class VideoTransformer(VideoTransformerBase):
+    def __init__(self, model_path, lbl_path, min_conf=0.5):
+        self.model_path = model_path
+        self.lbl_path = lbl_path
+        self.min_conf = min_conf
+        self.initialize_model()
+
+    def initialize_model(self):
+        # Load the label map into memory
+        with open(self.lbl_path, 'r') as f:
+            self.labels = [line.strip() for line in f.readlines()]
+
+        # Load the TensorFlow Lite model into memory
+        self.interpreter = Interpreter(model_path=self.model_path)
+        self.interpreter.allocate_tensors()
+
+        # Get model details
+        self.input_details = self.interpreter.get_input_details()
+        self.output_details = self.interpreter.get_output_details()
+        self.height = self.input_details[0]['shape'][1]
+        self.width = self.input_details[0]['shape'][2]
+
+    def transform(self, frame):
+        # Convert the frame to a PIL Image
+        pil_image = Image.fromarray(frame)
+
+        # Perform object detection
+        tflite_detect_images(pil_image, self.interpreter, self.labels, self.input_details, self.output_details,
+                            self.height, self.width, self.min_conf)
+
+        # Convert the processed frame back to a NumPy array
+        frame = np.array(pil_image)
+
+        return frame
 
 # Main Streamlit app
 def main():
@@ -103,38 +139,16 @@ def main():
 
     use_webcam = st.checkbox("Use Webcam")
     if use_webcam:
-        cap = cv2.VideoCapture(0)  # Open the default camera (0)
-        
-        # Set the width and height according to your preference
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+         st.title('Object Detection using Webcam')
 
+    
         min_conf_threshold = st.slider('Confidence Threshold', 0.0, 1.0, 0.5, 0.01)
+        transformer = VideoTransformer(PATH_TO_MODEL, PATH_TO_LABELS, min_conf_threshold)
 
-        while True:
-            ret, image = cap.read()
-            # Read a frame from the camera
-            if not ret:
-                 st.write("Can't receive frame (stream end?). Exiting ...")
-                 break
-
-            frame_rgb = cv2.imread(frame, cv2.COLOR_BGR2RGB)
-
-            # Convert the frame to PIL Image
-            pil_image = Image.fromarray(frame_rgb)
-
-            # Display the frame in Streamlit
-            st.image(frame_rgb, channels="RGB")
-            tflite_detect_images(pil_image, PATH_TO_MODEL, PATH_TO_LABELS, min_conf_threshold)
-                # Do further processing with detections if needed
-
-            # Check if the user wants to exit
-            if st.button('Stop Webcam'):
-                break
-
-        cap.release()  # Release the camera
-        cv2.destroyAllWindows()  # Close all OpenCV windows
-
+        # Display the webcam input and process frames using the transformer
+        webrtc_streamer(key="example", video_transformer_factory=lambda: transformer)
+        
+           
     else:
         st.title('Object Detection using Image Upload')
 
