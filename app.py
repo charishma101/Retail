@@ -158,10 +158,10 @@ def tflite_detect_images(image, modelpath, lblpath, min_conf=0.5, txt_only=False
     # Print prices of detected objects
     st.write("Detected Objects and Their Prices:")
     for detection in detections:
-        st.write(f"{detection[0]}: ${prices.get(detection[0], 0)}")
+        st.write(f"{detection[0]}: د.إ{prices.get(detection[0], 0)}")
 
     # Print total price
-    st.write(f"Total Price: ${total_price}")
+    st.write(f"Total Price: د.إ{total_price}")
 
     return detections, total_price
 
