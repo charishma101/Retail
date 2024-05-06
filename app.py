@@ -6,10 +6,8 @@ import io
 import glob
 import random
 from tensorflow.lite.python.interpreter import Interpreter
-import streamlit_webrtc as webrtc
 import matplotlib.pyplot as plt
 from PIL import Image
-from streamlit_webrtc import webrtc_streamer, RTCConfiguration
 
 # Define paths
 PATH_TO_MODEL = './detect.tflite'
@@ -98,26 +96,19 @@ def tflite_detect_images(image, modelpath, lblpath, min_conf=0.5, txt_only=False
         
     
     return 
-    
-def scale_resolution(frame):
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame = cv2.resize(frame, (width, height))
-        return frame
-    
+
 # Main Streamlit app
 def main():
-    st.title('Object Detection using Webcam')
+    st.title('Object Detection using Image Upload')
 
-    
+    uploaded_image = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
-    class VideoProcessor:
-	    def recv(self, frame):
-		    tflite_detect_images(frame, PATH_TO_MODEL, PATH_TO_LABELS)
-		    return 
+    if uploaded_image is not None:
+        min_conf_threshold = st.slider('Confidence Threshold', 0.0, 1.0, 0.5, 0.01)
 
-    webrtc_streamer(key="key", video_processor_factory=VideoProcessor,rtc_configuration=RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}))
-    
+        #if st.button('Start Detection'):
+        tflite_detect_images(uploaded_image, PATH_TO_MODEL, PATH_TO_LABELS, min_conf_threshold)
+            # Do further processing with detections if needed
 
-        
 if __name__ == '__main__':
     main()
